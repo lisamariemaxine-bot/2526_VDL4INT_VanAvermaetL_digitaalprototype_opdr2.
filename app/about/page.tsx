@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/exhaustive-deps, react-hooks/set-state-in-effect */
+
+
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';

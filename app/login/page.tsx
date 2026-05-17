@@ -19,10 +19,26 @@ import { toast } from "@/components/ui/toast"
  */
 
 export default function LoginPage() {
-  return null;
+  const [loading, setLoading] = React.useState(false)
+
+  const mockSubmit = (e: React.FormEvent, action: string) => {
+    e.preventDefault()
+    setLoading(true)
+    setTimeout(() => {
+      setLoading(false)
+      toast(`${action} Successful`, {
+        description: "This is a mocked authentication flow.",
+      })
+    }, 1000)
+  }
+
+  return (
+    <main className="flex min-h-screen items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
           <CardTitle>Welcome</CardTitle>
           <CardDescription>
-            Login, create an account, or reset your password
+            {"Login, create an account, or reset your password"}
           </CardDescription>
         </CardHeader>
 
