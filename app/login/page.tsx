@@ -19,7 +19,21 @@ import { toast } from "@/components/ui/toast"
  */
 
 export default function LoginPage() {
-  return null;
+  const [loading, setLoading] = React.useState(false)
+
+  const mockSubmit = (e: React.FormEvent, type: string) => {
+    e.preventDefault()
+    setLoading(true)
+    setTimeout(() => {
+      setLoading(false)
+      toast(`${type} successful!`)
+    }, 1000)
+  }
+
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center p-24">
+      <Card className="w-full max-w-md">
+        <CardHeader>
           <CardTitle>Welcome</CardTitle>
           <CardDescription>
             Login, create an account, or reset your password
