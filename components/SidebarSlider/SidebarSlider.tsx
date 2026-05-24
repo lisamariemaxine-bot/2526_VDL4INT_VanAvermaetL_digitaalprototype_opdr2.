@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X } from "lucide-react" // For close icon
 import { GiHamburgerMenu } from "react-icons/gi" // For hamburger icon
 
 interface SidebarSliderProps {
@@ -44,11 +43,8 @@ export default function SidebarSlider({ isOpen, onClose, children }: SidebarSlid
             transition={{ type: 'tween', duration: 0.3 }}
             className="fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-50 p-4"
           >
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center mb-4">
               <h2 className="text-xl font-semibold">Menu</h2>
-              <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded">
-                <X size={24} />
-              </button>
             </div>
             <nav>{children}</nav>
           </motion.div>
