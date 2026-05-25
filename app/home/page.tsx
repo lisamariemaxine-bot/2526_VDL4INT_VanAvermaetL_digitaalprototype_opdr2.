@@ -44,21 +44,52 @@ const imageDescriptions: Record<string, string> = {
 
 const expeditions = [
   { label: 'Antarctica (1897)', id: '1897' },
-  { label: 'Groenland (1905)', id: '1905' },
-  { label: 'Kara-zee (1907)', id: '1907' }
+  { label: 'De Koning Boudewijnbasis (1957–1961)', id: '1957' },
+  { label: 'Hubert & Dansercoer (1997–1998)', id: '1997' }
 ];
 
 const expeditionCrew: Record<string, string[]> = {
   '1897': [
     'Adrien de Gerlache', 'Georges Lecointe', 'Roald Amundsen', 'Frederick A. Cook', 'Henryk Arctowski', 'Emil Racoviță', 'Émile Danco', 'Max Van Rysselberghe', 'Antoni B. Dobrowolski', 'Henri Somers', 'Carl August Wiencke', 'Johan Koren', 'Jan Van Mirlo', 'Louis Michotte', 'Adam Tollefsen', 'Ludvig-Hjalmar Johansen', 'Engebret Knudsen', 'Gustave-Gaston Dufour'
   ],
-  '1905': [
+  '1957': [
     'Adrien de Gerlache', 'Georges Lecointe', 'Henryk Arctowski', 'Max Van Rysselberghe'
   ],
-  '1907': [
+  '1997': [
     'Adrien de Gerlache', 'Georges Lecointe', 'Max Van Rysselberghe'
   ]
 };
+
+const timelineEvents: Array<{ id: string; exp: string; date: string; title: string; desc: string }> = [
+  // Belgica (1897–1899) - 10 events
+  { id: 'e1', exp: '1897', date: 'aug 1897', title: 'Vertrek Antwerpen', desc: 'Vertrek uit Antwerpen.' },
+  { id: 'e2', exp: '1897', date: 'sep 1897', title: 'Madeira', desc: 'Kort tussenstop en bevoorrading.' },
+  { id: 'e3', exp: '1897', date: 'okt 1897', title: 'Rio de Janeiro', desc: 'Tussenstop; bemanning aangevuld.' },
+  { id: 'e4', exp: '1897', date: 'dec 1897', title: 'Punta Arenas', desc: 'Laatste stop voor Antarctica.' },
+  { id: 'e5', exp: '1898', date: 'jan 1898', title: 'Gerlache Strait', desc: 'Passage in kaart gebracht.' },
+  { id: 'e6', exp: '1898', date: 'feb 1898', title: 'In het pakijs', desc: 'Schip raakt vast; overwintering begint.' },
+  { id: 'e7', exp: '1898', date: 'mrt 1898', title: 'Wiencke verdronken', desc: 'Een bemanningslid raakt om het leven.' },
+  { id: 'e8', exp: '1898', date: 'jun 1898', title: 'Danco overleden', desc: 'Verlies van een wetenschapper aan boord.' },
+  { id: 'e9', exp: '1899', date: 'feb 1899', title: 'Bevrijding', desc: 'Schip komt los uit het ijs.' },
+  { id: 'e10', exp: '1899', date: 'nov 1899', title: 'Terugkeer Antwerpen', desc: 'Terugkeer naar huisbasis.' },
+
+  // Koning Boudewijnbasis (1957–1961) - 6 events
+  { id: 'e11', exp: '1957', date: 'dec 1957', title: 'Bouw gestart', desc: 'Start bouw van de basis (kerst 1957).' },
+  { id: 'e12', exp: '1957', date: 'jan 1958', title: 'Zomermetingen', desc: 'Vroege meteorologische waarnemingen.' },
+  { id: 'e13', exp: '1957', date: 'jul 1959', title: 'Wintermetingen', desc: 'Belangrijke wintermetingen uitgevoerd.' },
+  { id: 'e14', exp: '1957', date: 'dec 1960', title: 'Uitbreiding', desc: 'Faciliteiten werden uitgebreid.' },
+  { id: 'e15', exp: '1957', date: 'dec 1961', title: 'Sluiting', desc: 'Einde van de eerste operationele periode.' },
+  { id: 'e16', exp: '1957', date: 'jan 1962', title: 'Archivering', desc: 'Start van gegevensarchivering.' },
+
+  // Hubert & Dansercoer (1997–1998) - 6 events
+  { id: 'e17', exp: '1997', date: 'jan 1997', title: 'Start expeditie', desc: 'Begin van de oversteek.' },
+  { id: 'e18', exp: '1997', date: 'mrt 1997', title: 'Powerkite tests', desc: 'Optimalisatie van kite-techniek.' },
+  { id: 'e19', exp: '1997', date: 'jul 1997', title: 'Halverwege', desc: 'Halverwege bereikt; korte evaluatie.' },
+  { id: 'e20', exp: '1997', date: 'feb 1998', title: 'Windrecord', desc: 'Record van 271 km in 24 uur.' },
+  { id: 'e21', exp: '1997', date: 'apr 1998', title: 'Aankomst', desc: 'Doorkruising voltooid.' },
+  { id: 'e22', exp: '1997', date: 'mei 1998', title: 'Rapportage', desc: 'Nazorg en publicatie van resultaten.' }
+];
+
 
 type RoutePoint = {
   lat: number;
@@ -68,35 +99,95 @@ type RoutePoint = {
   note: string;
 };
 
+type WeatherPoint = {
+  dateLabel: string;
+  axisLabel: string;
+  label: string;
+  value: number;
+  note: string;
+  critical?: {
+    title: string;
+    text: string;
+  };
+};
+
 // Historisch interessante content voor progressive disclosure (Datapanel + Detail)
-const expeditionInfo: Record<string, { title: string, subtitle: string, text: string, detailText: string, quote: string }> = {
+const expeditionInfo: Record<string, { title: string, subtitle: string, text: string, detailText: string, quote: string, weatherSummary: string, weatherBullets: string[], weatherPoints: WeatherPoint[] }> = {
   '1897': { 
-    title: "Belgische Antarctische Expeditie (1897–1899)", 
-    subtitle: "De Eerste Antarctische Overwintering",
-    text: "De Belgica-expeditie van 1897-1899 was de eerste die bewust of onbewust een Antarctische winter doorbracht. Na vertrek uit Antwerpen op 16 augustus 1897 voer het schip via Madeira, Rio de Janeiro en Montevideo naar de Antarctische wateren, waar het op 28 februari 1898 vast kwam te zitten in het pakijs.",
-    detailText: "WETENSCHAP EN OVERLEVEN:\nDe bemanning deed meteorologische, oceanografische en hydrografische metingen terwijl het schip vastzat in het ijs. Frederick Cook en Adrien de Gerlache stimuleerden de bemanning om vers pinguïn- en zeehondenvlees te eten om scheurbuik te beperken. Henryk Arctowski en Emil Racoviță verrichtten waardevolle waarnemingen over weer, zeeleven en het poolmilieu, en Roald Amundsen deed ervaring op die later belangrijk werd in zijn eigen poolcarrière.",
-    quote: "\"We are imprisoned in an endless sea of ice. Time weighs heavily upon us as the darkness slowly advances.\" — Frederick Cook, 1898."
+    title: "De Belgica-expeditie (1897–1899)",
+    subtitle: "Geleid door Adrien de Gerlache — eerste wetenschappelijke expeditie naar Antarctica",
+    text: "De Belgica-expeditie (1897–1899) was geleid door Adrien de Gerlache. Het was de eerste wetenschappelijke Belgisch-geïnitieerde expeditie naar Antarctica en kende een onbedoelde overwintering toen het schip vast kwam te zitten in het ijs.",
+    detailText: "AANLOOP & CONTEXT (1895–1896):\n→ uitdaging Antarctica geformuleerd op congres in Londen\n→ Adrien de Gerlache start voorbereidingen\n→ schip Patria wordt Belgica\n\nDE REIS (1897–1899):\n→ vertrek uit Antwerpen met internationale bemanning (Gerlache, Amundsen, Cook, Lecointe)\n→ 22 jan 1898: dood van Wiencke tijdens storm (eerste dodelijk slachtoffer)\n→ feb 1898: ontdekking Gerlachestraat; schip raakt vast in het ijs\n→ winter 1898: 13 maanden ijsdrift in Bellingshausenzee; scheurbuik en honger; Emile Danco sterft; overleven deels met rauw vlees (Cook)\n→ 1899: bevrijding uit het ijs en terugkeer naar Antwerpen\n\nWETENSCHAPPELIJKE ERFENIS:\n→ 1959: Antarctisch Verdrag (vrede & wetenschap)\n→ 1991: Protocol van Madrid (natuurbescherming)\n\nEERSTE KEREN & SLEUTELCIJFERS:\n→ 1e wetenschappelijke expeditie; 1e overwintering van een schip in Antarctica; 1e ski op vasteland (Amundsen); 1e sleeëntocht en vroege meteorologische jaarreeks\n→ 13 maanden bevroren in het ijs; totale duur ca. 2 jaar 2 maanden; 1 dode (Wiencke), 1 gestorven aan boord (Emile Danco)\n\nROUTE (hoogtepunten):\n1. Antwerpen (vertrek 1897) → bevoorrading Zuid-Amerika → 2. Antarctisch schiereiland (aankomst 1898; Gerlachestraat & eilanden) → 3. Peter I Island / ijsvast → 4. Bellingshausenzee (lange drift) → 5. Terugkeer Antwerpen (1899)",
+    quote: "De Belgica legde de basis voor de moderne Belgische poolwetenschap.",
+    weatherSummary: "Temperatuurverloop en sleutelmomenten van de overwintering.",
+    weatherBullets: [
+      '13 maanden ijsdrift',
+      'Emile Danco overleden',
+      'Scheurbuik bestreden met vers vlees'
+    ],
+    weatherPoints: [
+      { dateLabel: 'aug 1897', axisLabel: 'aug 1897', label: 'Vertrek Antwerpen', value: 15, note: 'ca. +15°C' },
+      { dateLabel: 'jan 1898', axisLabel: 'jan 1898', label: 'Antarctische zomer', value: -7.5, note: 'ca. −5°C tot −10°C' },
+      { dateLabel: 'mrt 1898', axisLabel: 'mrt 1898', label: 'Vastgevroren', value: -20, note: 'ca. −20°C' },
+      { dateLabel: 'jun 1898', axisLabel: 'jun 1898', label: 'Poolwinter', value: -32.5, note: 'ca. −30°C tot −35°C' },
+      { dateLabel: 'feb 1899', axisLabel: 'feb 1899', label: 'Bevrijding', value: -12.5, note: 'ca. −10°C tot −15°C' }
+    ]
   },
-  '1905': { 
-    title: "Iter Boreale Occidentis", 
-    subtitle: "Onderzoek in de Groenlandzee",
-    text: "In 1905 voer de Belgica opnieuw uit voor een noordelijke wetenschappelijke reis. De expeditie onderzocht de Groenlandzee en de omgeving van Spitsbergen, met aandacht voor stromingen, ijscondities en diepzee-omstandigheden.",
-    detailText: "WETENSCHAPPELIJKE CONTEXT:\nDe reis maakte deel uit van de latere onderzoeksfase van de Belgica en van Adrien de Gerlache. Zulke noordelijke expedities leverden gegevens op over zee-ijs, temperatuur, stromingen en de geografische structuur van het Arctische gebied, en bouwden voort op de ervaring die de bemanning in Antarctica had opgedaan.",
-    quote: "\"De metingen in deze koude zeeën zijn geen luxe, maar de basis voor begrip van het poolklimaat.\""
+  '1957': {
+    title: "De Koning Boudewijnbasis (1957–1961)",
+    subtitle: "Geleid door Gaston de Gerlache — eerste Belgische basis in Queen Maud Land",
+    text: "De Koning Boudewijnbasis was de eerste Belgische wetenschappelijke basis op Antarctica (Queen Maud Land), opgezet onder leiding van Gaston de Gerlache, zoon van Adrien.",
+    detailText: "LOCATIE & PERIODE:\n→ 70°26' Z, 24°19' O (Queen Maud Land)\n→ Bouw gestart 1957 (Kerstdag) — operationeel tijdens 1957–1961\n\nKERNFEITEN:\n→ Zomer (dec–feb): ca. −10°C tot −15°C\n→ Winter (jun–aug): ca. −25°C tot −30°C\n→ Zuiderlicht waargenomen en geregistreerd\n→ Basis werd later gesloten en deels herbouwd in samenwerkingen (1964–1967)",
+    quote: "De basis markeert de start van langdurig Belgisch onderzoek in Antarctica.",
+    weatherSummary: "Korte weersamenvatting en locatiegegevens.",
+    weatherBullets: [
+      "70°26' Z, Queen Maud Land",
+      'Zomer: −10 tot −15°C',
+      'Winter: −25 tot −30°C',
+      'Zuiderlicht waargenomen'
+    ],
+    weatherPoints: [
+      { dateLabel: 'dec 1957', axisLabel: 'dec 1957', label: 'Start bouw', value: -12, note: 'Bouw gestart (kerstdag 1957)' },
+      { dateLabel: 'jan 1958', axisLabel: 'jan 1958', label: 'Zomer', value: -12.5, note: 'Zomermetingen' },
+      { dateLabel: 'jul 1959', axisLabel: 'jul 1959', label: 'Winter', value: -27.5, note: 'Wintermeting' },
+      { dateLabel: 'dec 1961', axisLabel: 'dec 1961', label: 'Sluiting', value: -15, note: 'Definitieve sluiting later in jaren 60' }
+    ]
   },
-  '1907': { 
-    title: "Mares Karae Mappatio", 
-    subtitle: "Hydrografie in de Kara-zee",
-    text: "De Belgica-expeditie van 1907 richtte zich op de Barentszzee en de Kara-zee. Het team onderzocht kustlijnen, stromingen en vaarwegen ten noorden van Siberië onder moeilijke ijs- en weersomstandigheden.",
-    detailText: "HYDROGRAFISCHE RESULTATEN:\nDe expeditie bracht onbekende of slecht beschreven delen van de Arctische kust in kaart. Die informatie was waardevol voor latere navigatie en voor de verdere wetenschappelijke verkenning van het hoge noorden.",
-    quote: "\"Elke meting in dit gebied helpt een leegte op de kaart te vullen.\""
+  '1997': {
+    title: "Hubert & Dansercoer (1997–1998)",
+    subtitle: "Alain Hubert & Dixie Dansercoer — trans-Antarctische oversteek",
+    text: "Hubert & Dansercoer maakten in 1997–1998 een Noord–Zuid doorkruising van Antarctica: 3.924 km in 99 dagen, met powerkite-verplaatsingen en recordafstanden.",
+    detailText: "BELGISCHE AVONTURIERS (1997–1998):\n→ 3.924 km afgelegd (Noord–Zuid) in 99 dagen\n→ pieksnelheid door wind: 271 km in 24 uur\n→ gebruik van powerkites voor voortstuwing\n→ belangrijke prestatie in moderne poolexploratie\n\nCIJFERS:\n→ 3.924 km\n→ 99 dagen\n→ 271 km (24u rekord)\n→ 150 km per sneeuwstaal (indicatief)\n→ 1998 aankomst op Zuidpool\n",
+    quote: "Een moderne Belgische prestatie in de traditie van poolonderzoek.",
+    weatherSummary: "Korte weerschets en prestaties tijdens doortocht.",
+    weatherBullets: [
+      'Gemiddelde temp: −20 tot −23°C',
+      'Recordpieken dankzij wind',
+      '99 dagen, 3.924 km'
+    ],
+    weatherPoints: [
+      { dateLabel: 'jan 1997', axisLabel: 'jan 1997', label: 'Start', value: -21, note: 'Start kustgebied' },
+      { dateLabel: 'jul 1997', axisLabel: 'jul 1997', label: 'Onderweg', value: -22.5, note: 'Gemiddelde temperaturen' },
+      { dateLabel: 'feb 1998', axisLabel: 'feb 1998', label: 'Record', value: -20, note: '271 km in 24 uur' },
+      { dateLabel: 'apr 1998', axisLabel: 'apr 1998', label: 'Einde', value: -21.5, note: 'Aankomst / einde traject' }
+    ]
   },
   'modern': { 
     title: "Scientia Contemporanea", 
     subtitle: "De erfenis van de Belgica",
     text: "De Belgica-expedities gelden vandaag als belangrijke vroege bijdragen aan poolonderzoek. Hun waarnemingen over ijs, weer, zee en biodiversiteit vormen een historisch referentiepunt voor moderne klimaat- en oceaanstudies.",
     detailText: "INTERNATIONALE ERFENIS:\nDe combinatie van wetenschappelijke nieuwsgierigheid, internationale bemanning en overlevingsvermogen maakte de Belgica tot een mijlpaal in de Heroic Age of Antarctic Exploration. De reis liet zien hoe essentieel systematische metingen zijn voor het begrijpen van het poolklimaat.",
-    quote: "\"De Belgica toonde dat wetenschap in extreme omstandigheden nog altijd vooruitgang kan boeken.\""
+    quote: "\"De Belgica toonde dat wetenschap in extreme omstandigheden nog altijd vooruitgang kan boeken.\"",
+    weatherSummary: "De Belgica-data blijven belangrijk voor poolonderzoek.",
+    weatherBullets: [
+      'Meerdere expedities naast elkaar',
+      'Temperatuur, ijs en weer'
+    ],
+    weatherPoints: [
+      { dateLabel: 'jan 1900', axisLabel: 'jan 1900', label: '1900', value: -10, note: 'referentiepunt' },
+      { dateLabel: 'jan 1950', axisLabel: 'jan 1950', label: '1950', value: -15, note: 'groeiende meetreeksen' },
+      { dateLabel: 'jan 2000', axisLabel: 'jan 2000', label: '2000', value: -20, note: 'satelliet- en veldmetingen' }
+    ]
   }
 };
 
@@ -120,24 +211,73 @@ const rawImageData = [
   { cleanName: "Belgica In Antwerpen Kade", file: "5318_belgica-in-antwerpen.jpg", exp: "1897" },
   { cleanName: "Belgica Zee", file: "5602_belgica.jpg", exp: "1897" },
   { cleanName: "Bemanning Van De Belgica", file: "9399_bemanning-van-de-belgica.jpg", exp: "1897" },
-  { cleanName: "De Belgica In Oostende", file: "8995_de-belgica-in-oostende-in-1905.jpg", exp: "1905" },
-  { cleanName: "Postkaart Belgica", file: "9397_postkaart-getiteld-qyacht-belgica-du-duc-dorleans-et-la-gareq-de-kaart-is-afkomstig-uit-de-collectie-van-omer-vilain.jpg", exp: "1905" },
-  { cleanName: "Herinneringskaart", file: "9398_herinneringskaart.jpg", exp: "1905" },
-  { cleanName: "Isfjord", file: "5322_isfjord.jpg", exp: "1905" },
-  { cleanName: "Lecointe Kaart Een", file: "32321_lecointe-1903-kaart-1.jpg", exp: "1907" },
-  { cleanName: "Lecointe Kaart Twee", file: "32322_lecointe-1903-kaart-2.jpg", exp: "1907" },
-  { cleanName: "Lecointe Kaart Drie", file: "32323_lecointe-1903-kaart-3.jpg", exp: "1907" },
-  { cleanName: "Lecointe Kaart Vier", file: "32324_lecointe-1903-kaart-4.jpg", exp: "1907" },
-  { cleanName: "Lecointe Kaart Vijf", file: "32325_lecointe-1903-kaart-5.jpg", exp: "1907" },
-  { cleanName: "Lecointe Kaart Zes", file: "32326_lecointe-1903-kaart-6.jpg", exp: "1907" },
-  { cleanName: "Lecointe Kaart Zeven", file: "32327_lecointe-1903-kaart-7.jpg", exp: "1907" },
-  { cleanName: "Arctowski En Thoulet Figuur Twee", file: "32666_arctowski-en-thoulet-1901-fig-2.jpg", exp: "1907" },
-  { cleanName: "Arctowski En Thoulet Figuur Zes", file: "32670_arctowski-en-thoulet-1901-fig-6.jpg", exp: "1907" },
-  { cleanName: "Scheepsplan", file: "5603_scheepsplan.jpg", exp: "1907" },
+  { cleanName: "De Belgica In Oostende", file: "8995_de-belgica-in-oostende-in-1905.jpg", exp: "1957" },
+  { cleanName: "Postkaart Belgica", file: "9397_postkaart-getiteld-qyacht-belgica-du-duc-dorleans-et-la-gareq-de-kaart-is-afkomstig-uit-de-collectie-van-omer-vilain.jpg", exp: "1957" },
+  { cleanName: "Herinneringskaart", file: "9398_herinneringskaart.jpg", exp: "1957" },
+  { cleanName: "Isfjord", file: "5322_isfjord.jpg", exp: "1957" },
+  { cleanName: "Lecointe Kaart Een", file: "32321_lecointe-1903-kaart-1.jpg", exp: "1997" },
+  { cleanName: "Lecointe Kaart Twee", file: "32322_lecointe-1903-kaart-2.jpg", exp: "1997" },
+  { cleanName: "Lecointe Kaart Drie", file: "32323_lecointe-1903-kaart-3.jpg", exp: "1997" },
+  { cleanName: "Lecointe Kaart Vier", file: "32324_lecointe-1903-kaart-4.jpg", exp: "1997" },
+  { cleanName: "Lecointe Kaart Vijf", file: "32325_lecointe-1903-kaart-5.jpg", exp: "1997" },
+  { cleanName: "Lecointe Kaart Zes", file: "32326_lecointe-1903-kaart-6.jpg", exp: "1997" },
+  { cleanName: "Lecointe Kaart Zeven", file: "32327_lecointe-1903-kaart-7.jpg", exp: "1997" },
+  { cleanName: "Arctowski En Thoulet Figuur Twee", file: "32666_arctowski-en-thoulet-1901-fig-2.jpg", exp: "1997" },
+  { cleanName: "Arctowski En Thoulet Figuur Zes", file: "32670_arctowski-en-thoulet-1901-fig-6.jpg", exp: "1997" },
+  { cleanName: "Scheepsplan", file: "5603_scheepsplan.jpg", exp: "1997" },
   { cleanName: "Successor", file: "babcb16a-1a1f-11ed-b07d-02b7b76bf47f.jpg.webp", exp: "modern" }
 ];
 
 const alphabetizedImageData = [...rawImageData].sort((a, b) => a.cleanName.localeCompare(b.cleanName));
+
+const yearFilterOptions = [
+  { label: 'Alle jaren', value: 'all' },
+  { label: '1897', value: '1897' },
+  { label: '1957–1961', value: '1957' },
+  { label: '1997–1998', value: '1997' },
+  { label: 'Modern', value: 'modern' }
+];
+
+const photoCategoryOptions = [
+  { label: 'Alles', value: 'all' },
+  { label: 'Kaarten', value: 'kaarten' },
+  { label: 'Bemanning', value: 'bemanning' }
+];
+
+const crewPhotoNames = new Set([
+  'nansen de scheepskat',
+  'roald amundsen',
+  'george lecointe',
+  'henryck arctowski',
+  'frederick albert cook',
+  'emile racovitza',
+  'adrien de gerlache',
+  'emile danco',
+  'george lecointe portret',
+  'henryck arctowski onderzoek',
+  'roald amundsen ijs',
+  'adrien de gerlache portret',
+  'bemanning van de belgica'
+]);
+
+const getPhotoCategory = (cleanName: string) => {
+  const lowerName = cleanName.toLowerCase();
+
+  if (
+    lowerName.includes('kaart') ||
+    lowerName.includes('scheepsplan') ||
+    lowerName.includes('postkaart') ||
+    lowerName.includes('herinneringskaart')
+  ) {
+    return 'kaarten';
+  }
+
+  if (crewPhotoNames.has(lowerName) || lowerName.includes('portret') || lowerName.includes('onderzoek')) {
+    return 'bemanning';
+  }
+
+  return 'overig';
+};
 
 export default function HomePage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -152,7 +292,11 @@ export default function HomePage() {
   
   const [showFilterTab, setShowFilterTab] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedYearFilter, setSelectedYearFilter] = useState('all');
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('all');
   const [showDetailPopup, setShowDetailPopup] = useState(false);
+  const [showTimelinePopup, setShowTimelinePopup] = useState(false);
+  const [timelineFilter, setTimelineFilter] = useState<'all'|'1897'|'1957'|'1997'>('all');
 
   const [randomStyles] = useState(() => 
     Array.from({ length: 6 }, () => ({
@@ -182,6 +326,13 @@ export default function HomePage() {
   }, [showPhotos]);
 
   useEffect(() => { searchQueryRef.current = searchQuery; }, [searchQuery]);
+
+  // Als de tijdlijn-popup opent, default filter naar de actieve expeditie (indien aanwezig)
+  useEffect(() => {
+    if (showTimelinePopup) {
+      setTimelineFilter(activeExpedition ? (activeExpedition as '1897'|'1957'|'1997') : 'all');
+    }
+  }, [showTimelinePopup, activeExpedition]);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !containerRef.current) return;
@@ -232,13 +383,13 @@ export default function HomePage() {
             {lat: -71.50, lon: -85.00, label: "Ingevroren in het ijs", date: "28 feb 1898", note: "De Belgica raakte hier definitief vast in het Antarctische pakijs."}
         ] 
       },
-      { id: '1905', center: { lat: 72, lon: 0 }, points: [
+      { id: '1957', center: { lat: 72, lon: 0 }, points: [
           {lat: 51.23, lon: 2.92, label: "Oostende", date: "1905", note: "De Belgica werd opnieuw ingezet voor een noordelijke wetenschappelijke expeditie."}, 
           {lat: 60.39, lon: 5.32, label: "Bergen", date: "1905", note: "De route liep langs de Noorse kust richting Arctische wateren."}, 
           {lat: 78.22, lon: 15.62, label: "Spitsbergen", date: "1905", note: "Spitsbergen vormde een belangrijk gebied voor ijs- en klimaatobservaties."}, 
           {lat: 75.0, lon: -18.0, label: "Groenland Zee", date: "1905", note: "Hier verrichtte de expeditie metingen aan zee, ijs en stroming."}
       ] },
-      { id: '1907', center: { lat: 68, lon: 40 }, points: [
+      { id: '1997', center: { lat: 68, lon: 40 }, points: [
           {lat: 51.21, lon: 4.40, label: "Antwerpen", date: "1907", note: "Vanuit Antwerpen begon de Belgica aan een hydrografische tocht naar het noorden."}, 
           {lat: 70.66, lon: 23.68, label: "Hammerfest", date: "1907", note: "Hammerfest was een belangrijke noordelijke tussenstop in Noorwegen."}, 
           {lat: 72.0, lon: 45.0, label: "Barentszzee", date: "1907", note: "In de Barentszzee werden kustlijnen en vaarwegen nauwkeurig opgemeten."}, 
@@ -410,9 +561,9 @@ export default function HomePage() {
         }
       }
 
-      const scaleValue = currentShowPhotos ? 1 : 1.14;
+      const scaleValue = currentShowPhotos ? 1 : 1.6;
       targetScale.set(scaleValue, scaleValue, scaleValue);
-      masterGroup.scale.lerp(targetScale, currentShowPhotos ? 0.08 : 0.12);
+      masterGroup.scale.lerp(targetScale, currentShowPhotos ? 0.08 : 0.28);
 
       photoGroup.rotation.y += isSelected ? 0.0002 : 0.0015;
       
@@ -486,7 +637,6 @@ export default function HomePage() {
   const handleExpeditionSelect = (id: string) => {
     setActiveExpedition(id);
     setSelectedPhotoUrl(null);
-    setShowPhotos(true);
     setNotification("Sleep je vinger over de wereldbol en ontdek de foto's van deze expeditie");
     setTimeout(() => setNotification(null), 10000);
   };
@@ -511,7 +661,9 @@ export default function HomePage() {
   };
 
   const filteredPhotos = alphabetizedImageData.filter(item => 
-    item.cleanName.toLowerCase().includes(searchQuery.toLowerCase())
+    item.cleanName.toLowerCase().includes(searchQuery.toLowerCase()) &&
+    (selectedYearFilter === 'all' || item.exp === selectedYearFilter) &&
+    (selectedCategoryFilter === 'all' || getPhotoCategory(item.cleanName) === selectedCategoryFilter)
   );
 
   return (
@@ -556,6 +708,12 @@ export default function HomePage() {
         @keyframes popupFadeIn {
           from { opacity: 0; transform: translate(-50%, -80%); }
           to { opacity: 1; transform: translate(-50%, -100%); }
+        }
+
+        @keyframes pointPulse {
+          0% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(0,0,0,0)); }
+          50% { transform: scale(1.18); filter: drop-shadow(0 0 6px rgba(0,0,0,0.45)); }
+          100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(0,0,0,0)); }
         }
 
         .nav-button {
@@ -714,23 +872,44 @@ export default function HomePage() {
 
         {/* --- DATAPANEL (RECHTS) --- */}
         {activeExpedition && expeditionInfo[activeExpedition] && (
-          <div style={{ width: '350px', padding: '20px', backgroundColor: 'rgba(255, 255, 255, 0.98)', borderLeft: '4px solid #000', boxShadow: '0 15px 40px rgba(0,0,0,0.08)' }}>
-            <h2 style={{ margin: '0 0 4px 0', fontSize: '18px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{expeditionInfo[activeExpedition].title}</h2>
-            <h4 style={{ margin: '0 0 12px 0', fontSize: '12px', color: '#666', textTransform: 'uppercase', fontWeight: 'bold' }}>{expeditionInfo[activeExpedition].subtitle}</h4>
-            <p style={{ margin: '0 0 10px 0', fontSize: '13px', lineHeight: '1.6', color: '#222' }}>{expeditionInfo[activeExpedition].text}</p>
+          <div style={{ width: '380px', padding: '28px 24px', backgroundColor: 'rgba(255, 255, 255, 0.98)', borderLeft: '4px solid #000', boxShadow: '0 15px 40px rgba(0,0,0,0.08)' }}>
+            <h2 style={{ margin: '0 0 6px 0', fontSize: '20px', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: 800 }}>{expeditionInfo[activeExpedition].title}</h2>
+            <h4 style={{ margin: '0 0 12px 0', fontSize: '12px', color: '#444', textTransform: 'uppercase', fontWeight: '700' }}>{expeditionInfo[activeExpedition].subtitle}</h4>
+            <p style={{ margin: '0 0 14px 0', fontSize: '14px', lineHeight: '1.7', color: '#222' }}>{expeditionInfo[activeExpedition].text}</p>
             {expeditionCrew[activeExpedition] && (
               <div style={{ margin: '0 0 12px 0', fontSize: '12px', color: '#333' }}>
-                <strong style={{ fontSize: '11px', textTransform: 'uppercase', marginRight: '6px' }}>Crew:</strong>
-                <span style={{ fontSize: '12px' }}>{expeditionCrew[activeExpedition].slice(0,6).join(', ')}{expeditionCrew[activeExpedition].length > 6 ? '…' : ''}</span>
+                <strong style={{ fontSize: '11px', textTransform: 'uppercase', marginRight: '6px', color: '#6b7280' }}>Crew:</strong>
+                <span style={{ fontSize: '12px', color: '#111' }}>{expeditionCrew[activeExpedition].slice(0,6).join(', ')}{expeditionCrew[activeExpedition].length > 6 ? '…' : ''}</span>
               </div>
             )}
             
-            <button 
+            <button
               onClick={() => setShowDetailPopup(true)}
-              style={{ background: 'transparent', border: '1px solid #000', padding: '8px 12px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', textTransform: 'uppercase', width: '100%', letterSpacing: '0.5px', transition: 'all 0.2s' }}
+              style={{ background: 'transparent', border: '1px solid #000', padding: '10px 14px', fontSize: '12px', fontWeight: '800', cursor: 'pointer', textTransform: 'uppercase', width: '100%', letterSpacing: '0.6px', transition: 'all 0.2s' }}
             >
-              Bekijk Verdiepende Details →
+              Temperatuurverloop →
             </button>
+
+            <button
+              onClick={() => {
+                // open timeline modal and default filter to the currently selected expedition
+                setTimelineFilter(activeExpedition ? (activeExpedition as '1897'|'1957'|'1997') : 'all');
+                setShowTimelinePopup(true);
+                setNotification('Tijdlijn geopend');
+                setTimeout(() => setNotification(null), 4000);
+                setTimeout(() => {
+                  try {
+                    const el = document.getElementById('chronotimeline');
+                    if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  } catch (e) {}
+                }, 120);
+              }}
+              style={{ background: 'transparent', border: '1px solid #000', padding: '10px 14px', fontSize: '12px', fontWeight: '800', cursor: 'pointer', textTransform: 'uppercase', width: '100%', letterSpacing: '0.6px', marginTop: '10px' }}
+            >
+              Tijdlijn →
+            </button>
+
+            {/* Compact infographic removed from datapanel; available via "Temperatuurverloop" */}
           </div>
         )}
 
@@ -750,7 +929,7 @@ export default function HomePage() {
       </div>
 
       {/* --- CHRONOLOGISCHE INTERACTIEVE TIJDLIJN (ASLIJN-LOOK) --- */}
-      <div style={{ 
+      <div id="chronotimeline" style={{ 
         position: 'absolute', 
         bottom: '80px', 
         left: '50%', 
@@ -793,13 +972,7 @@ export default function HomePage() {
                 {exp.label}
               </button>
               
-              {/* Verbindend verticaal streepje */}
-              <div style={{ 
-                width: '2px', 
-                height: '8px', 
-                background: '#000', 
-                marginTop: '2px' 
-              }} />
+              {/* verbindend streepje verwijderd per verzoek */}
             </div>
           ))}
         </div>
@@ -811,10 +984,13 @@ export default function HomePage() {
             disabled={!activeExpedition}
             onClick={() => {
               if (showPhotos) {
+                // user is hiding photos: stop rotation, clear markers and clear opened slots
                 isAutoRotating.current = true;
                 setMarkerInfo(null);
+                setSlots(new Array(6).fill(null));
+                setSelectedPhotoUrl(null);
               }
-              setShowPhotos(!showPhotos);
+              setShowPhotos(prev => !prev);
             }} 
             style={{ background: showPhotos ? 'rgba(255, 255, 255, 0.9)' : '#000', color: showPhotos ? '#000' : '#fff', width: '50px', padding: '10px' }}
             title={showPhotos ? "Verberg foto's" : "Toon foto's"}
@@ -853,62 +1029,382 @@ export default function HomePage() {
             <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#666' }}>KLIK OP EEN NAAM OM HIERONDER IN EEN SLOT TE ZETTEN</span>
           </div>
 
-          <div style={{ flex: 1, overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px', paddingBottom: '40px' }}>
-            {filteredPhotos.length > 0 ? (
-              filteredPhotos.map((item, index) => {
-                const url = `/Belgica_Antarctica/${item.file}`;
-                return (
-                  <div 
-                    key={index} 
-                    className="photo-grid-item"
-                    onClick={() => {
-                      handlePhotoClick(url);
-                      setShowFilterTab(false);
-                      setSearchQuery("");
-                    }}
-                  >
-                    <img src={url} alt={item.cleanName} style={{ width: activeExpedition === '1905' ? '80px' : '60px', height: activeExpedition === '1905' ? '80px' : '60px', objectFit: 'cover', border: '1px solid #000' }} />
-                    <div style={{ overflow: 'hidden' }}>
-                      <div style={{ fontSize: '14px', fontWeight: 'bold', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{item.cleanName}</div>
-                      <div style={{ fontSize: '11px', textTransform: 'uppercase', color: '#666', marginTop: '2px' }}>Expeditie: {item.exp}</div>
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px', fontSize: '14px', color: '#666', fontWeight: 'bold', textTransform: 'uppercase' }}>
-                Geen media gevonden voor deze zoekopdracht.
+          <div style={{ flex: 1, display: 'flex', gap: '24px', minHeight: 0 }}>
+            <aside style={{ width: '220px', flexShrink: 0, borderRight: '1px solid #ddd', paddingRight: '18px', overflowY: 'auto' }}>
+              <div style={{ position: 'sticky', top: 0, background: 'rgba(255,255,255,0.98)', paddingBottom: '14px' }}>
+                <div style={{ fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>Filter op jaar</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '18px' }}>
+                  {yearFilterOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => setSelectedYearFilter(option.value)}
+                      style={{
+                        padding: '10px 12px',
+                        border: '1px solid #000',
+                        background: selectedYearFilter === option.value ? '#000' : '#fff',
+                        color: selectedYearFilter === option.value ? '#fff' : '#000',
+                        textAlign: 'left',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        textTransform: 'uppercase',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div style={{ fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>Filter op type</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '18px' }}>
+                  {photoCategoryOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => setSelectedCategoryFilter(option.value)}
+                      style={{
+                        padding: '10px 12px',
+                        border: '1px solid #000',
+                        background: selectedCategoryFilter === option.value ? '#000' : '#fff',
+                        color: selectedCategoryFilter === option.value ? '#fff' : '#000',
+                        textAlign: 'left',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        textTransform: 'uppercase',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => {
+                    setSelectedYearFilter('all');
+                    setSelectedCategoryFilter('all');
+                    setSearchQuery('');
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '1px solid #000',
+                    background: '#f5f5f5',
+                    color: '#000',
+                    textAlign: 'left',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    textTransform: 'uppercase',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Reset filters
+                </button>
               </div>
-            )}
+            </aside>
+
+            <div style={{ flex: 1, overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px', paddingBottom: '40px' }}>
+              {filteredPhotos.length > 0 ? (
+                filteredPhotos.map((item, index) => {
+                  const url = `/Belgica_Antarctica/${item.file}`;
+                  return (
+                    <div 
+                      key={index} 
+                      className="photo-grid-item"
+                      onClick={() => {
+                        handlePhotoClick(url);
+                        setShowFilterTab(false);
+                        setSearchQuery("");
+                      }}
+                    >
+                      <img src={url} alt={item.cleanName} style={{ width: activeExpedition === '1957' ? '80px' : '60px', height: activeExpedition === '1957' ? '80px' : '60px', objectFit: 'cover', border: '1px solid #000' }} />
+                      <div style={{ overflow: 'hidden' }}>
+                        <div style={{ fontSize: '14px', fontWeight: 'bold', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{item.cleanName}</div>
+                        <div style={{ fontSize: '11px', textTransform: 'uppercase', color: '#666', marginTop: '2px' }}>Expeditie: {item.exp}</div>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px', fontSize: '14px', color: '#666', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                  Geen media gevonden voor deze zoekopdracht.
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
 
       {/* --- VERDIEPENDE DETAILWEERGAVE (RIJKE HISTORISCHE INHOUD) --- */}
       {showDetailPopup && activeExpedition && expeditionInfo[activeExpedition] && (
+            <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.5)', zIndex: 5000, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(1px)' }}>
+              <div style={{ background: 'white', padding: '12px', border: '2px solid #000', width: '95vw', maxWidth: '1200px', boxShadow: '0 20px 60px rgba(0,0,0,0.15)', boxSizing: 'border-box', margin: '0 auto' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <div>
+                      <h2 style={{ margin: 0, fontSize: '22px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 800, lineHeight: '1.15' }}>{expeditionInfo[activeExpedition].title}</h2>
+                      <h4 style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.6px' }}>{expeditionInfo[activeExpedition].subtitle}</h4>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <button className="nav-button" onClick={() => setShowDetailPopup(false)} style={{ background: '#000', color: '#fff', padding: '8px 12px', fontSize: '18px', lineHeight: '1' }} aria-label="Sluit detailweergave">×</button>
+                  </div>
+                </div>
+
+                    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '18px', justifyContent: 'center' }}>
+                      <div style={{ width: '100%', maxWidth: 'calc(95vw - 48px)', margin: '0 auto', background: '#f3f4f6', border: '1px solid #d1d5db', padding: '28px 30px', borderRadius: '2px', boxSizing: 'border-box' }}>
+                        <div style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.6px', color: '#6b7280', marginBottom: '8px' }}>Weerdata per expeditie</div>
+                        <div style={{ fontSize: '14px', lineHeight: '1.6', color: '#111827', fontWeight: 600 }}>{expeditionInfo[activeExpedition].weatherSummary}</div>
+                        {expeditionInfo[activeExpedition].weatherBullets.length > 0 && (
+                          <ul style={{ margin: '10px 0 0 20px', padding: 0, color: '#374151', fontSize: '14px', lineHeight: '1.6' }}>
+                            {expeditionInfo[activeExpedition].weatherBullets.map((bullet) => (
+                              <li key={bullet} style={{ marginBottom: '6px' }}>{bullet}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                      <div style={{ width: '100%', maxWidth: 'calc(95vw - 48px)', margin: '0 auto', padding: '0 12px' }}>
+                        <InteractiveTemperatureChart pointData={expeditionInfo[activeExpedition].weatherPoints} />
+                      </div>
+                    </div>
+              </div>
+        </div>
+      )}
+
+      {/* --- LEGE TIJDLIJN-TAB (WIT, ZELFDE STIJL ALS DETAIL) --- */}
+      {showTimelinePopup && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.5)', zIndex: 5000, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(1px)' }}>
-          <div style={{ background: 'white', padding: '40px', border: '2px solid #000', maxWidth: '550px', width: '90%', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
-            <h2 style={{ margin: '0 0 5px 0', fontSize: '20px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{expeditionInfo[activeExpedition].title}</h2>
-            <h4 style={{ margin: '0 0 20px 0', fontSize: '12px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{expeditionInfo[activeExpedition].subtitle}</h4>
-            
-            <p style={{ fontSize: '14px', lineHeight: '1.6', color: '#111', margin: '0 0 25px 0', whiteSpace: 'pre-line' }}>
-              {expeditionInfo[activeExpedition].detailText}
-            </p>
+          <div style={{ background: 'white', padding: '12px', border: '2px solid #000', width: '95vw', maxWidth: '1200px', boxShadow: '0 20px 60px rgba(0,0,0,0.15)', boxSizing: 'border-box', margin: '0 auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <div>
+                  <h2 style={{ margin: 0, fontSize: '22px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 800, lineHeight: '1.15' }}>Tijdlijn</h2>
+                  <h4 style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.6px' }}>Chronologische weergave</h4>
+              </div>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <button className="nav-button" onClick={() => setShowTimelinePopup(false)} style={{ background: '#000', color: '#fff', padding: '8px 12px', fontSize: '18px', lineHeight: '1' }} aria-label="Sluit tijdlijn">×</button>
+              </div>
+            </div>
 
-            <blockquote style={{ margin: '0 0 30px 0', paddingLeft: '15px', borderLeft: '3px solid #000', fontStyle: 'italic', fontSize: '13px', color: '#444', lineHeight: '1.5' }}>
-              {expeditionInfo[activeExpedition].quote}
-            </blockquote>
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '12px', justifyContent: 'center', minHeight: '240px' }}>
+              <div style={{ width: '100%', maxWidth: 'calc(95vw - 40px)', margin: '0 auto', background: '#fff', border: '1px solid #e5e7eb', padding: '28px', borderRadius: '6px', boxSizing: 'border-box' }}>
+                  <div style={{ display: 'flex', gap: '12px', marginBottom: '12px', alignItems: 'center' }}>
+                    {timelineFilter === 'all' ? (
+                      <>
+                        <button onClick={() => setTimelineFilter('all')} style={{ padding: '8px 12px', border: '2px solid #000', background: '#000', color: '#fff', cursor: 'pointer', fontWeight: 700 }}>Alle expedities</button>
+                        <button onClick={() => setTimelineFilter('1897')} style={{ padding: '8px 12px', border: '1px solid #ddd', background: '#fff', color: '#000', cursor: 'pointer', fontWeight: 700 }}>{expeditionInfo['1897'].title}</button>
+                        <button onClick={() => setTimelineFilter('1957')} style={{ padding: '8px 12px', border: '1px solid #ddd', background: '#fff', color: '#000', cursor: 'pointer', fontWeight: 700 }}>{expeditionInfo['1957'].title}</button>
+                        <button onClick={() => setTimelineFilter('1997')} style={{ padding: '8px 12px', border: '1px solid #ddd', background: '#fff', color: '#000', cursor: 'pointer', fontWeight: 700 }}>{expeditionInfo['1997'].title}</button>
+                      </>
+                    ) : (
+                      <div style={{ fontSize: '13px', fontWeight: 800, color: '#111' }}>
+                        {timelineFilter === '1897' ? expeditionInfo['1897'].title : timelineFilter === '1957' ? expeditionInfo['1957'].title : expeditionInfo['1997'].title}
+                      </div>
+                    )}
+                  </div>
 
-            <button 
-              className="nav-button" 
-              onClick={() => setShowDetailPopup(false)}
-              style={{ width: '100%', background: '#000', color: '#fff', fontSize: '13px' }}
-            >
-              Sluit Detailweergave
-            </button>
+                  <div style={{ maxHeight: '58vh', overflowY: 'auto', paddingRight: '6px' }}>
+                    {timelineEvents.filter(ev => timelineFilter === 'all' ? true : ev.exp === timelineFilter).map(ev => (
+                      <div key={ev.id} style={{ display: 'flex', gap: '14px', marginBottom: '14px', alignItems: 'flex-start' }}>
+                        <div style={{ width: '110px', fontSize: '13px', color: '#6b7280', fontWeight: 700 }}>{ev.date}</div>
+                        <div style={{ flex: 1, background: '#f3f4f6', border: '1px solid #d1d5db', padding: '16px 18px', borderRadius: '2px' }}>
+                          <div style={{ fontSize: '14px', fontWeight: 800, color: '#111' }}>{ev.title}</div>
+                          <div style={{ fontSize: '13px', color: '#374151', marginTop: '6px' }}>{ev.desc}</div>
+                          <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '8px' }}>{ev.exp === '1897' ? 'Belgica (1897–1899)' : ev.exp === '1957' ? 'De Koning Boudewijnbasis (1957–1961)' : 'Hubert & Dansercoer (1997–1998)'}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+            </div>
           </div>
         </div>
       )}
+
+      {/* --- Interactieve grafiek component (in file) --- */}
     </main>
+  );
+}
+
+function InteractiveTemperatureChart({ dataProp, pointData, compact }: { dataProp?: number[]; pointData?: WeatherPoint[]; compact?: boolean } = {}) {
+  const defaultData = [15,12,8,4,-2,-8,-14,-20,-28,-30,-33,-35,-33,-30,-28,-25,-22,-18,-14,-10,-6,0,5,8,10,12,14,15,14];
+  const isCustomSeries = Boolean(pointData?.length);
+  const data = pointData?.map(point => point.value) ?? dataProp ?? defaultData;
+  const labels = pointData?.map(point => point.dateLabel) ?? (() => {
+    const months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+    const labels: string[] = [];
+    let y = 1897, m = 7; // start in aug 1897
+    for (let i = 0; i < data.length; i++) {
+      m += 1;
+      if (m > 11) { m = 0; y += 1; }
+      const month = months[m];
+      labels.push(`${month} ${y}`);
+    }
+    return labels;
+  })();
+
+  const criticalMap: Record<number, { title: string; text: string }> = {
+    0: { title: 'Vertrek Antwerpen', text: 'Vertrek uit Antwerpen; de expeditie begint aan haar lange reis naar het zuiden.' },
+    5: { title: 'Storm — Wiencke verdronken', text: 'Zware storm; Carl Wiencke valt overboord en verdronk tijdens de expeditie.' },
+    7: { title: 'Vastgevroren in het ijs', text: 'De Belgica raakt vast in het pakijs en overwintert gedwongen in Antarctica.' },
+    10: { title: 'Emile Danco sterft', text: 'Emile Danco overlijdt aan de gevolgen van de barre omstandigheden aan boord.' },
+    18: { title: 'Bevrijding uit het ijs', text: 'De bemanning ervaart uiteindelijk moment van bevrijding wanneer het schip loskomt.' },
+    28: { title: 'Aankomst Antwerpen', text: 'Terugkeer naar Antwerpen; de expeditie eindigt en de bemanning keert huiswaarts.' }
+  };
+
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const pathRef = useRef<SVGPathElement | null>(null);
+  const [selectedCritical, setSelectedCritical] = useState<number | null>(null);
+  const [hoverInfo, setHoverInfo] = useState<{x:number,y:number,text:string} | null>(null);
+
+  useEffect(() => {
+    setSelectedCritical(null);
+    setHoverInfo(null);
+  }, [pointData]);
+
+  useEffect(() => {
+    const path = pathRef.current;
+    const svg = svgRef.current;
+    if (!path || !svg) return;
+    const length = (path.getTotalLength && path.getTotalLength()) || 0;
+    path.style.strokeDasharray = String(length);
+    path.style.strokeDashoffset = String(length);
+
+    const duration = 2000;
+    const start = performance.now();
+
+    const easeInOutQuart = (t: number) => t < 0.5 ? 8*t*t*t*t : 1 - Math.pow(-2*t+2,4)/2;
+
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = easeInOutQuart(t);
+      path.style.strokeDashoffset = String(Math.max(0, length * (1 - eased)));
+      if (t < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }, []);
+
+  // compute coordinates (adjust when compact)
+  const padding = compact ? 20 : 34;
+  const width = compact ? 780 : 1020; // viewBox width
+  const height = compact ? 180 : 300; // viewBox height
+  const innerW = width - padding*2;
+  const innerH = height - padding*2;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = Math.max(max - min, 1);
+  const points = data.map((v,i) => {
+    const x = data.length === 1 ? padding + innerW / 2 : padding + (i/(data.length-1)) * innerW;
+    const y = padding + ((max - v)/range) * innerH;
+    return { x, y, v, i };
+  });
+
+  const lineD = points.map((p, idx) => `${idx===0?'M':'L'} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(' ');
+  const areaD = `${lineD} L ${padding+innerW} ${padding+innerH} L ${padding} ${padding+innerH} Z`;
+  const yTicks = Array.from(new Set([min, -20, -10, 0, 10, max])).sort((a, b) => b - a);
+  const formatTemperature = (value: number) => Number.isInteger(value) ? `${value}°C` : `${value.toFixed(1)}°C`;
+  const activePoint = selectedCritical !== null ? pointData?.[selectedCritical] : undefined;
+
+  const handlePointHover = (e: any, p: {x:number,y:number,v:number,i:number}) => {
+    const point = pointData?.[p.i];
+    const name = point?.label ?? criticalMap[p.i]?.title;
+    const dateLabel = point?.dateLabel ?? labels[p.i];
+    setHoverInfo({ x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY, text: `${dateLabel}${name ? ` — ${name}` : ''} — ${formatTemperature(p.v)}` });
+  };
+
+  const handlePointLeave = () => setHoverInfo(null);
+
+  return (
+    <div style={{ width: '100%', margin: '0 auto', display: 'flex', justifyContent: 'center' }}>
+      <div style={{ width: '100%', maxWidth: '100%', background: '#fff', padding: '18px 22px', borderRadius: '8px', color: '#111', margin: '0 auto', border: '1px solid #e5e7eb' }}>
+        <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet" style={{ width: '100%', height: '300px', display: 'block' }}>
+          <defs>
+            <linearGradient id="gradFill" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stopColor="#8fc9ff" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#378ADD" stopOpacity="0.06" />
+            </linearGradient>
+            <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="6" result="b" />
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          {/* axes grid */}
+          <rect x="0" y="0" width={width} height={height} fill="none" />
+          {/* Y grid lines */}
+          {yTicks.map((val, idx) => {
+            const y = padding + ((max - val)/(max - min)) * innerH;
+            return (
+              <g key={idx}>
+                <line x1={padding} x2={padding+innerW} y1={y} y2={y} stroke="#e5e7eb" strokeWidth={1} />
+                <text x={padding - 8} y={y + 4} fontSize={11} fill="#6b7280" textAnchor="end">{formatTemperature(val)}</text>
+              </g>
+            );
+          })}
+
+          <text x={padding} y={18} fontSize={12} fill="#374151" fontWeight={700}>Temperatuur (°C)</text>
+
+          {/* area under curve */}
+          <path d={areaD} fill="url(#gradFill)" opacity={0.9} />
+
+          {/* animated line */}
+          <path ref={pathRef} d={lineD} fill="none" stroke="#378ADD" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'none' }} />
+
+          {/* points */}
+          {points.map(p => {
+            const customPoint = pointData?.[p.i];
+            const isCritical = Boolean(customPoint) || criticalMap[p.i] !== undefined;
+            const r = isCritical ? 7 : 3.5;
+            const fill = isCritical ? '#fff' : '#fff';
+            return (
+              <g key={p.i} transform={`translate(${p.x}, ${p.y})`}>
+                <circle cx={0} cy={0} r={r} fill={fill} stroke={isCritical? '#111' : '#378ADD'} strokeWidth={isCritical?2:1} style={{ cursor: 'pointer', animation: isCritical ? 'pointPulse 1.8s ease-in-out infinite' : undefined }}
+                  onMouseMove={(e) => handlePointHover(e, p)} onMouseLeave={handlePointLeave}
+                  onClick={(e) => { e.stopPropagation(); if (isCritical) setSelectedCritical(p.i); }} />
+              </g>
+            );
+          })}
+
+          {/* X labels - show every 3rd to keep readable */}
+          {labels.map((m, idx) => {
+            const p = points[idx];
+            if (!p) return null;
+            if (!isCustomSeries && idx % 3 !== 0 && idx !== labels.length-1) return null;
+            const isLast = idx === labels.length - 1;
+            const isSecondLast = idx === labels.length - 2;
+            return (
+              <text
+                key={idx}
+                x={p.x + (isSecondLast ? -8 : isLast ? 8 : 0)}
+                y={padding+innerH+20}
+                fontSize={11}
+                fill="#374151"
+                textAnchor={isSecondLast ? 'end' : isLast ? 'start' : 'middle'}
+              >
+                {m}
+              </text>
+            );
+          })}
+
+        </svg>
+        {/* hover tooltip */}
+        {hoverInfo && (
+          <div style={{ position: 'relative' }}>
+            <div style={{ position: 'absolute', left: hoverInfo.x + 12, top: hoverInfo.y - 8, background: 'rgba(17,24,39,0.92)', color: '#fff', padding: '6px 8px', borderRadius: '6px', pointerEvents: 'none', fontSize: '12px' }}>{hoverInfo.text}</div>
+          </div>
+        )}
+
+        {/* critical info pane */}
+        {selectedCritical !== null && (
+          <div style={{ marginTop: '16px', background: '#f3f4f6', padding: '18px', borderRadius: '2px', color: '#111', display: 'flex', gap: '14px', alignItems: 'flex-start', border: '1px solid #d1d5db' }}>
+            <div style={{ width: '12px', height: '12px', background: '#fff', border: '1px solid #111', borderRadius: '50%' }} />
+            <div>
+              <div style={{ fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#6b7280' }}>{pointData ? 'Weerpunt' : 'Gebeurtenis'}</div>
+              <div style={{ fontSize: '14px', fontWeight: '700', marginTop: '2px' }}>{pointData ? activePoint?.label : criticalMap[selectedCritical].title}</div>
+              {pointData && activePoint?.dateLabel && (
+                <div style={{ fontSize: '12px', fontWeight: 700, color: '#6b7280', marginTop: '2px' }}>{activePoint.dateLabel}</div>
+              )}
+              <div style={{ fontSize: '13px', color: '#374151', marginTop: '6px', lineHeight: '1.45' }}>{pointData ? `${formatTemperature(activePoint?.value ?? 0)}${activePoint?.note ? ` · ${activePoint.note}` : ''}` : criticalMap[selectedCritical].text}</div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
